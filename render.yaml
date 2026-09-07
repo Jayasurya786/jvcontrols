@@ -32,6 +32,10 @@ services:
         sync: false
       - key: RESEND_FROM
         sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
       - key: PRIMARY_PHONE
         value: "+91 9500087723"
       - key: PRIMARY_WHATSAPP

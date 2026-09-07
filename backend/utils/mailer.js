@@ -92,7 +92,36 @@ export async function deliverEmail({ from, to, subject, html }) {
   const fromAddress = from || process.env.FROM_EMAIL || `"JV Controls Chennai" <${process.env.SMTP_USER || 'jvcjvcontrols@gmail.com'}>`;
   const recipientList = Array.isArray(to) ? to : (typeof to === 'string' ? to.split(',').map(s => s.trim()).filter(Boolean) : [to]);
 
-  // 1. Resend API (HTTPS Port 443)
+  // 1. Brevo API (HTTPS Port 443 — sends to ANY customer email without requiring custom domain)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || 'jvcjvcontrols@gmail.com';
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'JV Controls Chennai', email: senderEmail },
+          to: recipientList.map((email) => ({ email })),
+          subject,
+          htmlContent: html,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        console.log(`[JV Controls Mailer] 🚀 Email delivered via Brevo API to ${recipientList.join(', ')}. ID: ${data.messageId}`);
+        return { success: true, delivered: true, messageId: data.messageId, provider: 'brevo' };
+      } else {
+        console.warn(`[JV Controls Mailer] ⚠️ Brevo API returned error: ${data.message || JSON.stringify(data)}`);
+      }
+    } catch (err) {
+      console.warn(`[JV Controls Mailer] ⚠️ Brevo fetch failed (${err.message}). Trying fallback...`);
+    }
+  }
+
+  // 2. Resend API (HTTPS Port 443 — works for verified domains or testing to registered email)
   if (process.env.RESEND_API_KEY) {
     try {
       const res = await fetch('https://api.resend.com/emails', {
@@ -117,34 +146,6 @@ export async function deliverEmail({ from, to, subject, html }) {
       }
     } catch (err) {
       console.warn(`[JV Controls Mailer] ⚠️ Resend fetch failed (${err.message}). Trying fallback...`);
-    }
-  }
-
-  // 2. Brevo API (HTTPS Port 443)
-  if (process.env.BREVO_API_KEY) {
-    try {
-      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          'api-key': process.env.BREVO_API_KEY,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sender: { name: 'JV Controls Chennai', email: process.env.SMTP_USER || 'jvcjvcontrols@gmail.com' },
-          to: recipientList.map(email => ({ email })),
-          subject,
-          htmlContent: html,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        console.log(`[JV Controls Mailer] 🚀 Email delivered via Brevo API to ${recipientList.join(', ')}. ID: ${data.messageId}`);
-        return { success: true, delivered: true, messageId: data.messageId, provider: 'brevo' };
-      } else {
-        console.warn(`[JV Controls Mailer] ⚠️ Brevo API returned error: ${data.message || JSON.stringify(data)}`);
-      }
-    } catch (err) {
-      console.warn(`[JV Controls Mailer] ⚠️ Brevo fetch failed (${err.message}). Trying fallback...`);
     }
   }
 
