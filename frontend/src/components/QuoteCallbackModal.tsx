@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../utils/api';
 import { 
   X, 
   Sparkles, 
@@ -72,7 +73,7 @@ export const QuoteCallbackModal: React.FC<QuoteCallbackModalProps> = ({
       details = `Load: ~${loadData.watts}W (${loadData.hours}h backup)\nInverter: ${loadData.va}VA | Battery: ${loadData.ah}Ah\n${notes}`;
     }
 
-    return `*⚡ QUOTATION / CALLBACK REQUEST - JV CONTROLS*\n\n` +
+    return `*âš¡ QUOTATION / CALLBACK REQUEST - JV CONTROLS*\n\n` +
       `*Customer Name:* ${name || 'Customer'}\n` +
       `*Mobile:* ${mobile}\n` +
       `*Email:* ${email || 'N/A'}\n` +
@@ -113,7 +114,7 @@ export const QuoteCallbackModal: React.FC<QuoteCallbackModalProps> = ({
 
     try {
       // 1. Log to Node.js server
-      fetch('/api/inquiry', {
+      fetch(apiUrl('/api/inquiry'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -152,10 +153,10 @@ export const QuoteCallbackModal: React.FC<QuoteCallbackModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-black text-slate-900 leading-snug">
-                {language === 'ta' ? 'இலவச விலைப்புள்ளி & திரும்ப அழைப்பு' : 'Request Quotation / Callback'}
+                {language === 'ta' ? 'à®‡à®²à®µà®š à®µà®¿à®²à¯ˆà®ªà¯à®ªà¯à®³à¯à®³à®¿ & à®¤à®¿à®°à¯à®®à¯à®ª à®…à®´à¯ˆà®ªà¯à®ªà¯' : 'Request Quotation / Callback'}
               </h3>
               <p className="text-[11px] text-slate-500">
-                {language === 'ta' ? 'சென்னையில் உடனடி பொறியாளர் ஆலோசனை' : 'Direct consultation from JV Controls Annanagar East'}
+                {language === 'ta' ? 'à®šà¯†à®©à¯à®©à¯ˆà®¯à®¿à®²à¯ à®‰à®Ÿà®©à®Ÿà®¿ à®ªà¯Šà®±à®¿à®¯à®¾à®³à®°à¯ à®†à®²à¯‹à®šà®©à¯ˆ' : 'Direct consultation from JV Controls Annanagar East'}
               </p>
             </div>
           </div>
@@ -177,11 +178,11 @@ export const QuoteCallbackModal: React.FC<QuoteCallbackModalProps> = ({
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h4 className="text-xl font-black text-slate-900">
-                {language === 'ta' ? `நன்றி, ${name}!` : `Thank You, ${name}!`}
+                {language === 'ta' ? `à®¨à®©à¯à®±à®¿, ${name}!` : `Thank You, ${name}!`}
               </h4>
               <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
                 {language === 'ta'
-                  ? `உங்கள் கோரிக்கை பதிவு செய்யப்பட்டுள்ளது. எங்கள் பொறியாளர் உங்களை விரைவில் ${mobile} எண்ணில் அழைப்பார்.`
+                  ? `à®‰à®™à¯à®•à®³à¯ à®•à¯‹à®°à®¿à®•à¯à®•à¯ˆ à®ªà®¤à®¿à®µà¯ à®šà¯†à®¯à¯à®¯à®ªà¯à®ªà®Ÿà¯à®Ÿà¯à®³à¯à®³à®¤à¯. à®Žà®™à¯à®•à®³à¯ à®ªà¯Šà®±à®¿à®¯à®¾à®³à®°à¯ à®‰à®™à¯à®•à®³à¯ˆ à®µà®¿à®°à¯ˆà®µà®¿à®²à¯ ${mobile} à®Žà®£à¯à®£à®¿à®²à¯ à®…à®´à¯ˆà®ªà¯à®ªà®¾à®°à¯.`
                   : `Your inquiry has been received. Our power engineer will contact you at ${mobile} with quotation and installation options.`}
               </p>
 
@@ -246,7 +247,7 @@ export const QuoteCallbackModal: React.FC<QuoteCallbackModalProps> = ({
                   <Calculator className="w-5 h-5 text-[#ea580c] shrink-0" />
                   <div>
                     <span className="font-black">Load Calculation: </span>
-                    <span>~{loadData.watts}W ({loadData.hours}h Backup) • Recommended: <strong>{loadData.va}VA Inverter</strong> + <strong>{loadData.ah}Ah Battery</strong></span>
+                    <span>~{loadData.watts}W ({loadData.hours}h Backup) â€¢ Recommended: <strong>{loadData.va}VA Inverter</strong> + <strong>{loadData.ah}Ah Battery</strong></span>
                   </div>
                 </div>
               )}
@@ -368,7 +369,7 @@ export const QuoteCallbackModal: React.FC<QuoteCallbackModalProps> = ({
               {/* Trust Badge Footer */}
               <div className="pt-1 text-center text-[10px] text-slate-400 flex items-center justify-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Primary Helpline: <strong>+91 9500087723</strong> • Doorstep site study in Chennai</span>
+                <span>Primary Helpline: <strong>+91 9500087723</strong> â€¢ Doorstep site study in Chennai</span>
               </div>
             </form>
           )}
@@ -377,4 +378,6 @@ export const QuoteCallbackModal: React.FC<QuoteCallbackModalProps> = ({
     </div>
   );
 };
+
+
 

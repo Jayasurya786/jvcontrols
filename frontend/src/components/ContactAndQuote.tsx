@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../utils/api';
 import { 
   MapPin, 
   Phone, 
@@ -57,7 +58,7 @@ export const ContactAndQuote: React.FC<ContactAndQuoteProps> = ({
   }, [initialProduct, initialLoadData, initialService]);
 
   const generateWhatsAppMessage = () => {
-    return `*⚡ NEW INQUIRY - JV CONTROLS CHENNAI*\n\n` +
+    return `*âš¡ NEW INQUIRY - JV CONTROLS CHENNAI*\n\n` +
       `*Name:* ${firstName} ${lastName}\n` +
       `*Mobile:* ${mobile}\n` +
       `*Alt Phone:* ${telephone || 'N/A'}\n` +
@@ -96,7 +97,7 @@ export const ContactAndQuote: React.FC<ContactAndQuoteProps> = ({
 
     try {
       // 1. Post to Node.js backend server
-      fetch('/api/inquiry', {
+      fetch(apiUrl('/api/inquiry'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -315,7 +316,7 @@ export const ContactAndQuote: React.FC<ContactAndQuoteProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      {language === 'ta' ? 'முதல் பெயர் *' : 'First Name *'}
+                      {language === 'ta' ? 'à®®à¯à®¤à®²à¯ à®ªà¯†à®¯à®°à¯ *' : 'First Name *'}
                     </label>
                     <input
                       type="text"
@@ -329,7 +330,7 @@ export const ContactAndQuote: React.FC<ContactAndQuoteProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      {language === 'ta' ? 'குடும்ப பெயர்' : 'Last Name'}
+                      {language === 'ta' ? 'à®•à¯à®Ÿà¯à®®à¯à®ª à®ªà¯†à®¯à®°à¯' : 'Last Name'}
                     </label>
                     <input
                       type="text"
@@ -358,7 +359,7 @@ export const ContactAndQuote: React.FC<ContactAndQuoteProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      {language === 'ta' ? 'மாற்று தொலைபேசி' : 'Telephone / Alt Phone'}
+                      {language === 'ta' ? 'à®®à®¾à®±à¯à®±à¯ à®¤à¯Šà®²à¯ˆà®ªà¯‡à®šà®¿' : 'Telephone / Alt Phone'}
                     </label>
                     <input
                       type="tel"
@@ -460,3 +461,5 @@ export const ContactAndQuote: React.FC<ContactAndQuoteProps> = ({
     </section>
   );
 };
+
+

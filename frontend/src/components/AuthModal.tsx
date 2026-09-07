@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import { apiUrl } from '../utils/api';
 import { 
   X, 
   Lock, 
@@ -84,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(apiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -119,7 +120,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+      const res = await fetch(apiUrl('/api/auth/verify-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -148,7 +149,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/auth/resend-otp', {
+      const res = await fetch(apiUrl('/api/auth/resend-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -173,7 +174,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -208,7 +209,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
+      const res = await fetch(apiUrl('/api/auth/forgot-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -235,7 +236,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
+      const res = await fetch(apiUrl('/api/auth/reset-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, newPassword }),
@@ -353,7 +354,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="password"
                     required
-                    placeholder="••••••••"
+                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#004b87] bg-white text-slate-900"
@@ -561,7 +562,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onClick={() => switchView('register')}
                   className="text-xs text-slate-500 hover:underline"
                 >
-                  ← Change Email Address
+                  â† Change Email Address
                 </button>
               </div>
             </form>
@@ -614,7 +615,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onClick={() => switchView('login')}
                   className="text-xs text-slate-600 hover:underline font-medium"
                 >
-                  ← Back to Sign In
+                  â† Back to Sign In
                 </button>
               </div>
             </form>
@@ -684,7 +685,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onClick={() => switchView('login')}
                   className="text-xs text-slate-600 hover:underline font-medium"
                 >
-                  ← Back to Sign In
+                  â† Back to Sign In
                 </button>
               </div>
             </form>
@@ -695,4 +696,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     </div>
   );
 };
+
+
 

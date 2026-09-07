@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
+import { apiUrl } from '../utils/api';
 import { 
   X, 
   User as UserIcon, 
@@ -161,7 +162,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
 
     try {
       // 1. Load user's profile and own inquiries & products
-      const res = await fetch('/api/auth/me', {
+      const res = await fetch(apiUrl('/api/auth/me'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -172,7 +173,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
 
         // Also query /api/customer/my-products to ensure any email or phone linked products are loaded
         try {
-          const pRes = await fetch('/api/customer/my-products', {
+          const pRes = await fetch(apiUrl('/api/customer/my-products'), {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (pRes.ok) {
@@ -191,12 +192,12 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
       // 2. If user is authorized admin, load comprehensive management data
       if (isAdmin) {
         const [statsRes, inqRes, tixRes, usersRes, prodsRes, notifRes] = await Promise.all([
-          fetch('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('/api/admin/inquiries', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('/api/admin/tickets', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('/api/admin/customer-products', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('/api/admin/notifications/read', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/admin/stats'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/admin/inquiries'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/admin/tickets'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/admin/users'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/admin/customer-products'), { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(apiUrl('/api/admin/notifications/read'), { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
         if (statsRes.ok) {
@@ -390,7 +391,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
           )
         );
         showEmailFeedback(
-          `✓ 6-Month Service #${serviceNumber} alert email sent to Customer & Admin!`,
+          `âœ“ 6-Month Service #${serviceNumber} alert email sent to Customer & Admin!`,
           'success'
         );
       } else {
@@ -428,7 +429,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
           )
         );
         showEmailFeedback(
-          '✓ Warranty expiry notice email sent to Customer & Admin!',
+          'âœ“ Warranty expiry notice email sent to Customer & Admin!',
           'success'
         );
       } else {
@@ -446,7 +447,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     setSendingEmailKey('scan-all');
 
     try {
-      const res = await fetch('/api/admin/notifications/scan-and-send-emails', {
+      const res = await fetch(apiUrl('/api/admin/notifications/scan-and-send-emails'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -506,8 +507,8 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
         cardClass: 'bg-emerald-50/60 border-emerald-300 text-emerald-950 ring-1 ring-emerald-200',
         iconBgClass: 'bg-emerald-600 text-white',
         statusLabel: service.servicedDate
-          ? `✓ Done on ${new Date(service.servicedDate).toLocaleDateString('en-IN')}${service.technician ? ` (${service.technician})` : ''}`
-          : '✓ Serviced & Completed',
+          ? `âœ“ Done on ${new Date(service.servicedDate).toLocaleDateString('en-IN')}${service.technician ? ` (${service.technician})` : ''}`
+          : 'âœ“ Serviced & Completed',
         isOverdue: false,
         isDueSoon: false,
         isUpcoming: false,
@@ -522,7 +523,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
         badgeClass: 'bg-slate-100 text-slate-700 border border-slate-300 font-bold',
         cardClass: 'bg-white border-slate-200 text-slate-800 shadow-xs',
         iconBgClass: 'bg-slate-400 text-white',
-        statusLabel: '🗓️ Scheduled Checkup',
+        statusLabel: 'ðŸ—“ï¸ Scheduled Checkup',
         isOverdue: false,
         isDueSoon: false,
         isUpcoming: true,
@@ -539,11 +540,11 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
       const daysOverdue = Math.abs(diffDays);
       return {
         statusKey: 'OVERDUE',
-        badgeText: '🚨 OVERDUE',
+        badgeText: 'ðŸš¨ OVERDUE',
         badgeClass: 'bg-rose-600 text-white border border-rose-700 shadow-xs animate-pulse font-black',
         cardClass: 'bg-rose-50/90 border-rose-300 text-rose-950 ring-2 ring-rose-300 shadow-xs',
         iconBgClass: 'bg-rose-600 text-white animate-pulse',
-        statusLabel: `⚠️ Overdue by ${daysOverdue} day${daysOverdue === 1 ? '' : 's'} — Immediate Action Required`,
+        statusLabel: `âš ï¸ Overdue by ${daysOverdue} day${daysOverdue === 1 ? '' : 's'} â€” Immediate Action Required`,
         isOverdue: true,
         isDueSoon: false,
         isUpcoming: false,
@@ -554,11 +555,11 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     if (diffDays <= 30) {
       return {
         statusKey: 'DUE_SOON',
-        badgeText: diffDays === 0 ? '🔴 DUE TODAY' : `🔴 DUE IN ${diffDays}D`,
+        badgeText: diffDays === 0 ? 'ðŸ”´ DUE TODAY' : `ðŸ”´ DUE IN ${diffDays}D`,
         badgeClass: 'bg-amber-500 text-slate-950 border border-amber-600 shadow-xs font-black',
         cardClass: 'bg-amber-50/90 border-amber-300 text-amber-950 ring-1 ring-amber-300 shadow-xs',
         iconBgClass: 'bg-amber-600 text-white',
-        statusLabel: diffDays === 0 ? '🔴 Maintenance Checkup Due Today' : `⚠️ Maintenance Due in ${diffDays} day${diffDays === 1 ? '' : 's'}`,
+        statusLabel: diffDays === 0 ? 'ðŸ”´ Maintenance Checkup Due Today' : `âš ï¸ Maintenance Due in ${diffDays} day${diffDays === 1 ? '' : 's'}`,
         isOverdue: false,
         isDueSoon: true,
         isUpcoming: false,
@@ -569,11 +570,11 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     const monthsAway = Math.round(diffDays / 30);
     return {
       statusKey: 'UPCOMING',
-      badgeText: '🗓️ UPCOMING',
+      badgeText: 'ðŸ—“ï¸ UPCOMING',
       badgeClass: 'bg-slate-100 text-slate-700 border border-slate-300 font-bold',
       cardClass: 'bg-white border-slate-200 text-slate-800 hover:border-slate-300 shadow-xs',
       iconBgClass: 'bg-slate-400 text-white',
-      statusLabel: `🗓️ Scheduled Checkup (in ~${monthsAway} months)`,
+      statusLabel: `ðŸ—“ï¸ Scheduled Checkup (in ~${monthsAway} months)`,
       isOverdue: false,
       isDueSoon: false,
       isUpcoming: true,
@@ -804,13 +805,13 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
 Dear *${prod.customerName}*,
 Thank you for choosing JV Controls. Here are your product and warranty registration details:
 
-📦 *Product:* ${prod.productName}
-🔢 *Serial Number:* ${prod.serialNumber}
-📅 *Purchase Date:* ${pDate}
-🛡️ *Warranty Period:* ${prod.warrantyYears} Year(s)
-⏳ *Warranty Valid Until:* ${expDate}
-📍 *Installation Address:* ${prod.address}
-${prod.invoiceNumber ? `📄 *Invoice Number:* ${prod.invoiceNumber}\n` : ''}
+ðŸ“¦ *Product:* ${prod.productName}
+ðŸ”¢ *Serial Number:* ${prod.serialNumber}
+ðŸ“… *Purchase Date:* ${pDate}
+ðŸ›¡ï¸ *Warranty Period:* ${prod.warrantyYears} Year(s)
+â³ *Warranty Valid Until:* ${expDate}
+ðŸ“ *Installation Address:* ${prod.address}
+${prod.invoiceNumber ? `ðŸ“„ *Invoice Number:* ${prod.invoiceNumber}\n` : ''}
 For technical service, battery replacement, or emergency breakdown, call *+91 9500087723*.
 
 *JV Controls Chennai*
@@ -944,7 +945,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
     } catch {}
 
     try {
-      await fetch('/api/admin/notifications/mark-read', {
+      await fetch(apiUrl('/api/admin/notifications/mark-read'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -966,7 +967,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
     } catch {}
 
     try {
-      await fetch('/api/admin/notifications/mark-read', {
+      await fetch(apiUrl('/api/admin/notifications/mark-read'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1015,7 +1016,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
           category: 'New Inquiry',
           title: `New Inquiry: ${inq.name || 'Customer'}`,
           subtitle: inq.product || inq.serviceType || 'Sales / Quote Request',
-          message: `${inq.name || 'A customer'} submitted an inquiry for ${inq.product || inq.serviceType || 'power backup'}.${inq.mobile ? ` Phone: ${inq.mobile}` : ''}${inq.location ? ` • Location: ${inq.location}` : ''}`,
+          message: `${inq.name || 'A customer'} submitted an inquiry for ${inq.product || inq.serviceType || 'power backup'}.${inq.mobile ? ` Phone: ${inq.mobile}` : ''}${inq.location ? ` â€¢ Location: ${inq.location}` : ''}`,
           phone: inq.mobile || inq.phone,
           email: inq.email,
           date: inq.createdAt || new Date().toISOString(),
@@ -1048,11 +1049,11 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
             notifs.push({
               id: `service-${prodKey}-${s.serviceNumber}`,
               type: 'SERVICE',
-              category: isOverdue ? '🚨 6M Service Overdue' : '🔴 6M Service Due',
+              category: isOverdue ? 'ðŸš¨ 6M Service Overdue' : 'ðŸ”´ 6M Service Due',
               title: isOverdue
-                ? `🚨 Overdue Service: ${p.productName}`
-                : `🔴 6-Month Service Due: ${p.productName}`,
-              subtitle: `${s.label || `Service #${s.serviceNumber}`} • S/N: ${p.serialNumber}`,
+                ? `ðŸš¨ Overdue Service: ${p.productName}`
+                : `ðŸ”´ 6-Month Service Due: ${p.productName}`,
+              subtitle: `${s.label || `Service #${s.serviceNumber}`} â€¢ S/N: ${p.serialNumber}`,
               message: `Maintenance service #${s.serviceNumber} for ${p.customerName} (${p.mobile}) ${
                 isOverdue ? `was due on ${dueDateFormatted} (OVERDUE). Please dispatch engineer.` : `is due on ${dueDateFormatted}. Schedule battery inspection.`
               }`,
@@ -1085,8 +1086,8 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
           id: `warranty-expired-${prodKey}`,
           type: 'WARRANTY',
           category: 'Warranty Expired',
-          title: `⚠️ Warranty Expired: ${p.productName}`,
-          subtitle: `S/N: ${p.serialNumber} • ${p.customerName}`,
+          title: `âš ï¸ Warranty Expired: ${p.productName}`,
+          subtitle: `S/N: ${p.serialNumber} â€¢ ${p.customerName}`,
           message: `Manufacturer warranty for ${p.productName} (S/N: ${p.serialNumber}) expired on ${expFormatted}. Contact ${p.customerName} (${p.mobile}) to offer an AMC maintenance contract.`,
           phone: p.mobile,
           email: p.email,
@@ -1103,8 +1104,8 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
           id: `warranty-expiring-${prodKey}`,
           type: 'WARRANTY',
           category: 'Warranty Expiring Soon',
-          title: `⏳ Warranty Expiring in ${diffDays} Day${diffDays === 1 ? '' : 's'}: ${p.productName}`,
-          subtitle: `S/N: ${p.serialNumber} • ${p.customerName}`,
+          title: `â³ Warranty Expiring in ${diffDays} Day${diffDays === 1 ? '' : 's'}: ${p.productName}`,
+          subtitle: `S/N: ${p.serialNumber} â€¢ ${p.customerName}`,
           message: `Warranty for ${p.productName} (S/N: ${p.serialNumber}) expires on ${expFormatted}. Proactively schedule warranty extension / AMC renewal for ${p.customerName} (${p.mobile}).`,
           phone: p.mobile,
           email: p.email,
@@ -1503,13 +1504,13 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                             </div>
                             <div className="text-xs text-slate-600 mt-0.5 flex items-center gap-3 flex-wrap">
                               {inquiryNotifCount > 0 && (
-                                <span className="text-blue-700 font-bold">📩 {inquiryNotifCount} New Inquiries</span>
+                                <span className="text-blue-700 font-bold">ðŸ“© {inquiryNotifCount} New Inquiries</span>
                               )}
                               {serviceNotifCount > 0 && (
-                                <span className="text-rose-700 font-bold">🔴 {serviceNotifCount} 6M Services Due</span>
+                                <span className="text-rose-700 font-bold">ðŸ”´ {serviceNotifCount} 6M Services Due</span>
                               )}
                               {warrantyNotifCount > 0 && (
-                                <span className="text-amber-800 font-bold">⚠️ {warrantyNotifCount} Warranty Alerts</span>
+                                <span className="text-amber-800 font-bold">âš ï¸ {warrantyNotifCount} Warranty Alerts</span>
                               )}
                             </div>
                           </div>
@@ -1607,7 +1608,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         {unresolvedInquiriesCount}
                       </div>
                       <div className="text-[11px] text-emerald-600 font-semibold mt-1">
-                        ● {newInquiriesCount} New Follow-ups • {resolvedInquiriesCount} Resolved
+                        â— {newInquiriesCount} New Follow-ups â€¢ {resolvedInquiriesCount} Resolved
                       </div>
                     </div>
 
@@ -1620,7 +1621,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         {unresolvedTicketsCount}
                       </div>
                       <div className="text-[11px] text-rose-600 font-semibold mt-1">
-                        ● {emergencyTicketsCount} Urgent Breakdowns • {resolvedTicketsCount} Resolved
+                        â— {emergencyTicketsCount} Urgent Breakdowns â€¢ {resolvedTicketsCount} Resolved
                       </div>
                     </div>
 
@@ -1659,7 +1660,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-extrabold text-sm text-[#004b87] group-hover:underline">
-                          Review Customer Quotations & Leads →
+                          Review Customer Quotations & Leads â†’
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
@@ -1685,7 +1686,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-extrabold text-sm text-rose-700 group-hover:underline">
-                          Review Urgent AMC Breakdown Tickets →
+                          Review Urgent AMC Breakdown Tickets â†’
                         </div>
                         <div className="flex items-center gap-1.5">
                           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
@@ -1761,7 +1762,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         }`}
                       >
                         <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                        <span>🔥 New Inquiries ({newInquiriesCount})</span>
+                        <span>ðŸ”¥ New Inquiries ({newInquiriesCount})</span>
                       </button>
 
                       <button
@@ -1803,7 +1804,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         onClick={() => setSearchQuery('')}
                         className="absolute right-3.5 top-2.5 text-xs text-slate-400 hover:text-slate-600"
                       >
-                        ✕
+                        âœ•
                       </button>
                     )}
                   </div>
@@ -1952,7 +1953,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         }`}
                       >
                         <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                        <span>🚨 Emergency ({emergencyTicketsCount})</span>
+                        <span>ðŸš¨ Emergency ({emergencyTicketsCount})</span>
                       </button>
 
                       <button
@@ -2005,7 +2006,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         onClick={() => setTicketSearchQuery('')}
                         className="absolute right-3.5 top-2.5 text-xs text-slate-400 hover:text-slate-600"
                       >
-                        ✕
+                        âœ•
                       </button>
                     )}
                   </div>
@@ -2048,7 +2049,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                     ? 'bg-rose-100 text-rose-800 border border-rose-300'
                                     : 'bg-slate-100 text-slate-700 border border-slate-200'
                                 }`}>
-                                  {tix.priority === 'emergency' ? '🚨 EMERGENCY BREAKDOWN' : '🛠️ ROUTINE AMC'}
+                                  {tix.priority === 'emergency' ? 'ðŸš¨ EMERGENCY BREAKDOWN' : 'ðŸ› ï¸ ROUTINE AMC'}
                                 </span>
                                 <span className="text-[11px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded-md">
                                   #{tix.ticketId || tix.id}
@@ -2387,7 +2388,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                           onClick={() => setProdSearchQuery('')}
                           className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-600"
                         >
-                          ✕
+                          âœ•
                         </button>
                       )}
                     </div>
@@ -2424,7 +2425,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         }`}
                       >
                         <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                        <span>🔴 Service Pending</span>
+                        <span>ðŸ”´ Service Pending</span>
                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
                           prodFilterStatus === 'SERVICE_PENDING' ? 'bg-white/25 text-white' : 'bg-rose-200 text-rose-800'
                         }`}>
@@ -2442,7 +2443,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                         }`}
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>🟢 Serviced</span>
+                        <span>ðŸŸ¢ Serviced</span>
                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
                           prodFilterStatus === 'SERVICED' ? 'bg-white/25 text-white' : 'bg-emerald-200 text-emerald-800'
                         }`}>
@@ -2616,7 +2617,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                           ? 'Sending Email...'
                                           : prod.warrantyEmailNotifiedAt
                                           ? `Re-send Warranty Email (${new Date(prod.warrantyEmailNotifiedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})`
-                                          : '📧 Send Warranty Notice Email'}
+                                          : 'ðŸ“§ Send Warranty Notice Email'}
                                       </span>
                                     </button>
                                   </div>
@@ -2653,7 +2654,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                             6-Month Periodic Maintenance Services
                                           </span>
                                           <span className="bg-blue-100 text-[#004b87] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                            Every 6 Months • {totalServices} Services Till Warranty
+                                            Every 6 Months â€¢ {totalServices} Services Till Warranty
                                           </span>
                                         </div>
                                         <div className="text-[11px] text-slate-500 mt-0.5">
@@ -2666,21 +2667,21 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                       {/* Overdue alert pill */}
                                       {overdueCount > 0 && (
                                         <span className="bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs animate-pulse">
-                                          <span>🚨 {overdueCount} Overdue</span>
+                                          <span>ðŸš¨ {overdueCount} Overdue</span>
                                         </span>
                                       )}
 
                                       {/* Due soon alert pill */}
                                       {dueSoonCount > 0 && (
                                         <span className="bg-amber-500 text-slate-950 text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
-                                          <span>🔴 {dueSoonCount} Due Soon</span>
+                                          <span>ðŸ”´ {dueSoonCount} Due Soon</span>
                                         </span>
                                       )}
 
                                       {/* Upcoming badge if no overdue or due soon */}
                                       {pendingActionCount === 0 && upcomingCount > 0 && (
                                         <span className="bg-slate-100 text-slate-700 border border-slate-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                                          <span>🗓️ {upcomingCount} Upcoming</span>
+                                          <span>ðŸ—“ï¸ {upcomingCount} Upcoming</span>
                                         </span>
                                       )}
 
@@ -2734,7 +2735,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                             }`}
                                           >
                                             <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-                                            <span>🔴 Action Due ({pendingActionCount})</span>
+                                            <span>ðŸ”´ Action Due ({pendingActionCount})</span>
                                           </button>
 
                                           <button
@@ -2747,7 +2748,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                             }`}
                                           >
                                             <Calendar className="w-3 h-3 text-slate-500" />
-                                            <span>🗓️ Upcoming ({upcomingCount})</span>
+                                            <span>ðŸ—“ï¸ Upcoming ({upcomingCount})</span>
                                           </button>
 
                                           <button
@@ -2760,7 +2761,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                             }`}
                                           >
                                             <Check className="w-3 h-3 text-emerald-600" />
-                                            <span>🟢 Serviced ({servicedCount})</span>
+                                            <span>ðŸŸ¢ Serviced ({servicedCount})</span>
                                           </button>
                                         </div>
                                       </div>
@@ -2858,7 +2859,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                                            ? 'Sending...'
                                                            : service.emailNotifiedAt
                                                            ? `Sent (${new Date(service.emailNotifiedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})`
-                                                           : '📧 Send Email'}
+                                                           : 'ðŸ“§ Send Email'}
                                                        </span>
                                                      </button>
 
@@ -3253,21 +3254,21 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                   {/* Overdue alert pill */}
                                   {overdueCount > 0 && (
                                     <span className="bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs animate-pulse">
-                                      <span>🚨 {overdueCount} Service{overdueCount > 1 ? 's' : ''} Overdue</span>
+                                      <span>ðŸš¨ {overdueCount} Service{overdueCount > 1 ? 's' : ''} Overdue</span>
                                     </span>
                                   )}
 
                                   {/* Due soon alert pill */}
                                   {dueSoonCount > 0 && (
                                     <span className="bg-amber-500 text-slate-950 text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
-                                      <span>🔴 {dueSoonCount} Due Soon</span>
+                                      <span>ðŸ”´ {dueSoonCount} Due Soon</span>
                                     </span>
                                   )}
 
                                   {/* Upcoming badge if no overdue or due soon */}
                                   {pendingActionCount === 0 && upcomingCount > 0 && (
                                     <span className="bg-slate-100 text-slate-700 border border-slate-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                                      <span>🗓️ {upcomingCount} Upcoming</span>
+                                      <span>ðŸ—“ï¸ {upcomingCount} Upcoming</span>
                                     </span>
                                   )}
 
@@ -3324,7 +3325,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                             </div>
                                             {isServiced && (
                                               <div className="text-[10px] text-emerald-700 font-bold mt-1">
-                                                ✓ Completed {service.servicedDate ? new Date(service.servicedDate).toLocaleDateString('en-IN') : ''}
+                                                âœ“ Completed {service.servicedDate ? new Date(service.servicedDate).toLocaleDateString('en-IN') : ''}
                                               </div>
                                             )}
                                             {!isServiced && (
@@ -3360,7 +3361,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
 
                                       {info.isUpcoming && (
                                         <div className="text-[10px] text-slate-400 italic text-center pt-1 border-t border-slate-100">
-                                          Scheduled checkup — reminder will be sent before due date
+                                          Scheduled checkup â€” reminder will be sent before due date
                                         </div>
                                       )}
                                     </div>
@@ -3463,7 +3464,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
         <div className="p-4 px-6 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 shrink-0">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>JV Controls Chennai • Encrypted Session Active</span>
+            <span>JV Controls Chennai â€¢ Encrypted Session Active</span>
           </div>
 
           <button
@@ -3978,7 +3979,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                 </span>
                                 {notif.urgency === 'CRITICAL' && (
                                   <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-rose-600 text-white animate-pulse">
-                                    🚨 OVERDUE
+                                    ðŸš¨ OVERDUE
                                   </span>
                                 )}
                               </div>
@@ -4023,7 +4024,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                   ? 'Sending Email...'
                                   : notif.meta.service.emailNotifiedAt
                                   ? `Re-send Alert (${new Date(notif.meta.service.emailNotifiedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})`
-                                  : '📧 Send Email Alert'}
+                                  : 'ðŸ“§ Send Email Alert'}
                               </span>
                             </button>
                           )}
@@ -4050,7 +4051,7 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
                                   ? 'Sending Email...'
                                   : notif.meta.prod.warrantyEmailNotifiedAt
                                   ? `Re-send Alert (${new Date(notif.meta.prod.warrantyEmailNotifiedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})`
-                                  : '📧 Send Email Alert'}
+                                  : 'ðŸ“§ Send Email Alert'}
                               </span>
                             </button>
                           )}
@@ -4099,4 +4100,6 @@ Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040`;
     </div>
   );
 };
+
+
 

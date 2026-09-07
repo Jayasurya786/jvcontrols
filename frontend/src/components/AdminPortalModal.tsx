@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../utils/api';
 import { 
   X, 
   ShieldCheck, 
@@ -48,28 +49,28 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({ isOpen, onCl
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch Stats
-      const statsRes = await fetch('/api/admin/stats', { headers });
+      const statsRes = await fetch(apiUrl('/api/admin/stats'), { headers });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData.stats);
       }
 
       // Fetch Inquiries
-      const inqRes = await fetch('/api/admin/inquiries', { headers });
+      const inqRes = await fetch(apiUrl('/api/admin/inquiries'), { headers });
       if (inqRes.ok) {
         const inqData = await inqRes.json();
         setInquiries(inqData.inquiries || []);
       }
 
       // Fetch Tickets
-      const tixRes = await fetch('/api/admin/tickets', { headers });
+      const tixRes = await fetch(apiUrl('/api/admin/tickets'), { headers });
       if (tixRes.ok) {
         const tixData = await tixRes.json();
         setTickets(tixData.tickets || []);
       }
 
       // Fetch Users
-      const usersRes = await fetch('/api/admin/users', { headers });
+      const usersRes = await fetch(apiUrl('/api/admin/users'), { headers });
       if (usersRes.ok) {
         const usersData = await usersRes.json();
         setUsersList(usersData.users || []);
@@ -302,8 +303,8 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({ isOpen, onCl
                   className="px-2.5 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 bg-white focus:outline-none"
                 >
                   <option value="ALL">All Priority</option>
-                  <option value="emergency">🚨 Emergency</option>
-                  <option value="routine">🛠️ Routine</option>
+                  <option value="emergency">ðŸš¨ Emergency</option>
+                  <option value="routine">ðŸ› ï¸ Routine</option>
                 </select>
               )}
             </div>
@@ -419,7 +420,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({ isOpen, onCl
                               ? 'bg-rose-100 text-rose-800 border border-rose-300'
                               : 'bg-blue-100 text-blue-800 border border-blue-300'
                           }`}>
-                            {tix.priority === 'emergency' ? '🚨 EMERGENCY' : '🛠️ ROUTINE'}
+                            {tix.priority === 'emergency' ? 'ðŸš¨ EMERGENCY' : 'ðŸ› ï¸ ROUTINE'}
                           </span>
                           <span className="text-xs font-black text-slate-900">{tix.name}</span>
                           <span className="text-[10px] text-slate-400 font-bold uppercase">{tix.ticketId}</span>
@@ -526,4 +527,5 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({ isOpen, onCl
     </div>
   );
 };
+
 

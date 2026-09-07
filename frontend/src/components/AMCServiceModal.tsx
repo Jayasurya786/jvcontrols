@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiUrl } from '../utils/api';
 import { X, Wrench, AlertTriangle, Clock, Phone, Send, CheckCircle2, MessageCircle, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -21,7 +22,7 @@ export const AMCServiceModal: React.FC<AMCServiceModalProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   const handleWhatsAppDispatch = () => {
-    const priorityText = priority === 'emergency' ? '🚨 EMERGENCY BREAKDOWN (URGENT)' : '🛠️ ROUTINE AMC / SERVICE';
+    const priorityText = priority === 'emergency' ? 'ðŸš¨ EMERGENCY BREAKDOWN (URGENT)' : 'ðŸ› ï¸ ROUTINE AMC / SERVICE';
     const message = `*JV CONTROLS SERVICE TICKET*\n\n` +
       `*Priority:* ${priorityText}\n` +
       `*Name:* ${name || 'Customer'}\n` +
@@ -43,7 +44,7 @@ export const AMCServiceModal: React.FC<AMCServiceModalProps> = ({ isOpen, onClos
     }
 
     // Log ticket to Node.js backend server
-    fetch('/api/amc-dispatch', {
+    fetch(apiUrl('/api/amc-dispatch'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -312,4 +313,5 @@ export const AMCServiceModal: React.FC<AMCServiceModalProps> = ({ isOpen, onClos
     </div>
   );
 };
+
 

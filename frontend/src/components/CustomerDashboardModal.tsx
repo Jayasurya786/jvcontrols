@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../utils/api';
 import { 
   X, 
   User as UserIcon, 
@@ -41,7 +42,7 @@ export const CustomerDashboardModal: React.FC<CustomerDashboardModalProps> = ({
   const fetchUserData = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/me', {
+      const res = await fetch(apiUrl('/api/auth/me'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -251,7 +252,7 @@ export const CustomerDashboardModal: React.FC<CustomerDashboardModalProps> = ({
                           ? 'bg-rose-100 text-rose-800 border border-rose-200'
                           : 'bg-blue-100 text-blue-800 border border-blue-200'
                       }`}>
-                        {tix.priority === 'emergency' ? '🚨 Emergency' : '🛠️ Routine'}
+                        {tix.priority === 'emergency' ? 'ðŸš¨ Emergency' : 'ðŸ› ï¸ Routine'}
                       </span>
                     </div>
 
@@ -275,4 +276,6 @@ export const CustomerDashboardModal: React.FC<CustomerDashboardModalProps> = ({
     </div>
   );
 };
+
+
 
