@@ -228,6 +228,35 @@ export async function sendPasswordResetOTP(email, name, otp) {
   console.log(`6-Digit OTP: >>> ${otp} <<< (Valid for 10 minutes)`);
   console.log('====================================================');
 
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 550px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
+      <div style="background: #004b87; padding: 24px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">JV CONTROLS CHENNAI</h1>
+        <p style="color: #cbd5e1; margin: 6px 0 0 0; font-size: 12px; text-transform: uppercase;">Password Reset Request</p>
+      </div>
+      <div style="padding: 32px 24px;">
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Password Reset Verification</h2>
+        <p style="color: #475569; font-size: 14px; line-height: 1.6;">Hello <strong>${name || 'Customer'}</strong>,</p>
+        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+          We received a request to reset your password. Use the following 6-digit code to complete the reset:
+        </p>
+        <div style="margin: 24px 0; text-align: center;">
+          <span style="display: inline-block; font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #dc2626; background: #fef2f2; padding: 12px 28px; border-radius: 12px; border: 2px dashed #dc2626;">
+            ${otp}
+          </span>
+        </div>
+        <p style="color: #64748b; font-size: 12px;">
+          This code is valid for <strong>10 minutes</strong>. If you did not request a password reset, please contact our helpline immediately at +91 9500087723.
+        </p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="color: #94a3b8; font-size: 11px; text-align: center; margin: 0;">
+          Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040<br />
+          Helpline: +91 9500087723 | Email: jvcjvcontrols@gmail.com
+        </p>
+      </div>
+    </div>
+  `;
+
   const result = await deliverEmail({
     to: email,
     subject: `[${otp}] Reset Your JV Controls Password`,

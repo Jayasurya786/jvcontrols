@@ -8,6 +8,7 @@ import {
   User as UserIcon, 
   ShieldCheck, 
   ArrowRight, 
+  ArrowLeft, 
   KeyRound, 
   AlertCircle, 
   CheckCircle2, 
@@ -343,7 +344,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="password"
                     required
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#004b87] bg-white text-slate-900"
@@ -477,9 +478,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => switchView('login')}
-                  className="text-[#004b87] font-bold hover:underline"
+                  className="text-xs text-slate-600 hover:underline font-medium flex items-center justify-center gap-1.5 mx-auto"
                 >
-                  Sign In
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Sign In</span>
                 </button>
               </div>
             </form>
@@ -542,9 +544,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => switchView('register')}
-                  className="text-xs text-slate-500 hover:underline"
+                  className="text-xs text-slate-500 hover:underline flex items-center justify-center gap-1.5 mx-auto"
                 >
-                  â† Change Email Address
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Change Email Address</span>
                 </button>
               </div>
             </form>
@@ -595,9 +598,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => switchView('login')}
-                  className="text-xs text-slate-600 hover:underline font-medium"
+                  className="text-xs text-slate-600 hover:underline font-medium flex items-center justify-center gap-1.5 mx-auto"
                 >
-                  â† Back to Sign In
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Sign In</span>
                 </button>
               </div>
             </form>
@@ -658,9 +662,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => switchView('login')}
-                  className="text-xs text-slate-600 hover:underline font-medium"
+                  className="text-xs text-slate-600 hover:underline font-medium flex items-center justify-center gap-1.5 mx-auto"
                 >
-                  â† Back to Sign In
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Sign In</span>
                 </button>
               </div>
             </form>
@@ -671,6 +676,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     </div>
   );
 };
+
+
 
 
 
