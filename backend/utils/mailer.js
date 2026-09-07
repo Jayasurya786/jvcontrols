@@ -13,8 +13,13 @@ export function createTransporter() {
       (process.env.SMTP_USER || '').toLowerCase().includes('@gmail.com');
 
     if (isGmail) {
+      // Use explicit host + port instead of service:'gmail' to avoid IPv6 resolution issues.
+      // family:4 forces Node.js DNS to return only IPv4 addresses.
       return nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,          // SSL on port 465
+        family: 4,             // ← Force IPv4 (prevents ENETUNREACH on IPv6-only DNS results)
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
@@ -29,6 +34,7 @@ export function createTransporter() {
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
+      family: 4,               // ← Force IPv4 here too
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -40,6 +46,7 @@ export function createTransporter() {
   }
   return null;
 }
+
 
 /**
  * Verify SMTP connection on startup
