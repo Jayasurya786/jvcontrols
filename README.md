@@ -96,38 +96,6 @@ npm run dev      # Starts server with node --watch auto-reload
 
 ---
 
-## ⚙️ Backend Environment Variables (`backend/.env`)
-
-Configure your backend settings in `backend/.env`:
-
-```env
-# Server Port & Mode
-PORT=5000
-NODE_ENV=production
-
-# Support Hotlines
-PRIMARY_PHONE="+91 9500087723"
-PRIMARY_WHATSAPP="919500087723"
-
-# MongoDB Connection (Local or Atlas)
-MONGODB_URI=mongodb://localhost:27017/jvcontrols
-
-# JWT Secret
-JWT_SECRET=jvcontrols_jwt_secret_key_chennai_2026_9500087723
-
-# Admin Whitelist (Sole authorized administrator email)
-ADMIN_EMAILS=jvcjvcontrols@gmail.com
-
-# SMTP Nodemailer Email Configuration
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=viper637411@gmail.com
-SMTP_PASS=hgvyxuzihctqxkln
-FROM_EMAIL="JV Controls Chennai <viper637411@gmail.com>"
-```
-
----
-
 ## 🛡️ Key Features & Implementations
 
 1. **Decoupled Architecture**: Frontend and backend are completely isolated with zero circular dependencies or shared node_modules conflicts.
