@@ -288,12 +288,9 @@ app.post('/api/auth/register', async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: mailResult.delivered
-          ? `Verification code dispatched to ${cleanEmail}. Please check your inbox/spam folder.`
-          : `Verification code generated for ${cleanEmail}. (Code: ${otp})`,
+        message: `Verification code dispatched to ${cleanEmail}. Please check your inbox/spam folder.`,
         email: cleanEmail,
         name: user.name,
-        devOtp: otp,
       });
     } else {
       // Resilient local simulation if MongoDB is temporarily offline
@@ -301,10 +298,9 @@ app.post('/api/auth/register', async (req, res) => {
       console.log(`[AUTH] Local fallback registration for ${cleanEmail}, OTP: ${otp}`);
       return res.status(201).json({
         success: true,
-        message: `Verification code generated for ${cleanEmail}.`,
+        message: `Verification code dispatched to ${cleanEmail}.`,
         email: cleanEmail,
         name,
-        devOtp: otp,
       });
     }
   } catch (err) {
@@ -430,18 +426,14 @@ app.post('/api/auth/resend-otp', async (req, res) => {
 
       return res.json({
         success: true,
-        message: mailResult.delivered
-          ? `A new 6-digit verification code has been dispatched to ${cleanEmail}.`
-          : `A new verification code has been generated. (Code: ${newOtp})`,
-        devOtp: newOtp,
+        message: `A new 6-digit verification code has been dispatched to ${cleanEmail}.`,
       });
     } else {
       const newOtp = generateOTP();
       console.log(`[AUTH] Resending OTP to ${cleanEmail}: ${newOtp}`);
       return res.json({
         success: true,
-        message: `New OTP generated for ${cleanEmail}.`,
-        devOtp: newOtp,
+        message: `A new 6-digit verification code has been dispatched to ${cleanEmail}.`,
       });
     }
   } catch (err) {
@@ -562,20 +554,16 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
       return res.json({
         success: true,
-        message: mailResult.delivered
-          ? `A password reset code has been dispatched to ${cleanEmail}.`
-          : `Password reset code generated. (Code: ${otp})`,
+        message: `A password reset code has been dispatched to ${cleanEmail}.`,
         email: cleanEmail,
-        devOtp: otp,
       });
     } else {
       const otp = generateOTP();
       console.log(`[AUTH] Password reset OTP for ${cleanEmail}: ${otp}`);
       return res.json({
         success: true,
-        message: `Password reset code generated.`,
+        message: `Password reset code dispatched to ${cleanEmail}.`,
         email: cleanEmail,
-        devOtp: otp,
       });
     }
   } catch (err) {

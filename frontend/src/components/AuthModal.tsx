@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { apiUrl } from '../utils/api';
 import { 
   X, 
@@ -46,14 +46,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const resetForm = () => {
     setErrorMsg(null);
     setSuccessMsg(null);
-    setDevOtp(null);
     setPassword('');
     setOtp('');
     setNewPassword('');
@@ -101,9 +99,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         throw new Error(data.error || `Registration failed (HTTP ${res.status})`);
       }
 
-      if (data.devOtp) {
-        setDevOtp(data.devOtp);
-      }
       setSuccessMsg(data.message);
       setView('verify-otp');
     } catch (err: any) {
@@ -156,9 +151,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       });
       const data = await safeJson(res);
       if (!res.ok) throw new Error(data.error || `Failed to resend OTP (HTTP ${res.status})`);
-      if (data.devOtp) {
-        setDevOtp(data.devOtp);
-      }
       setSuccessMsg(data.message || 'A new verification code has been dispatched.');
     } catch (err: any) {
       setErrorMsg(err.message);
@@ -217,9 +209,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const data = await safeJson(res);
       if (!res.ok) throw new Error(data.error || `Request failed (HTTP ${res.status})`);
 
-      if (data.devOtp) {
-        setDevOtp(data.devOtp);
-      }
       setSuccessMsg(data.message);
       setView('reset-password');
     } catch (err: any) {
@@ -510,13 +499,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </p>
               </div>
 
-              {devOtp && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 max-w-xs mx-auto text-center animate-in fade-in">
-                  <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Verification OTP Code</div>
-                  <div className="font-mono text-xl font-black text-[#ea580c] tracking-widest mt-0.5">{devOtp}</div>
-                </div>
-              )}
-
               <div>
                 <input
                   type="text"
@@ -624,13 +606,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* ---------------- VIEW: RESET PASSWORD WITH OTP ---------------- */}
           {view === 'reset-password' && (
             <form onSubmit={handleResetPassword} className="space-y-3.5">
-              {devOtp && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-center animate-in fade-in">
-                  <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Reset OTP Code</div>
-                  <div className="font-mono text-xl font-black text-[#ea580c] tracking-widest mt-0.5">{devOtp}</div>
-                </div>
-              )}
-
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                   6-Digit OTP from Email
