@@ -1,3 +1,6 @@
+import { setDefaultResultOrder } from 'dns';
+setDefaultResultOrder('ipv4first'); // Force IPv4 DNS resolution (fixes ENETUNREACH on Render/cloud)
+
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
