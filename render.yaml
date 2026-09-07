@@ -12,13 +12,23 @@
         value: production
       - key: PORT
         value: 10000
-      - key: MONGO_URI
+      - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
         sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
       - key: SMTP_USER
         sync: false
       - key: SMTP_PASS
         sync: false
+      - key: FROM_EMAIL
+        sync: false
       - key: ADMIN_EMAILS
         sync: false
+      - key: PRIMARY_PHONE
+        value: "+91 9500087723"
+      - key: PRIMARY_WHATSAPP
+        value: "919500087723"
