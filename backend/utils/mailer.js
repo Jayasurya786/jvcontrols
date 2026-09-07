@@ -54,12 +54,20 @@ export function createTransporter() {
 
 
 /**
- * Verify SMTP connection on startup
+ * Verify SMTP / Email connection on startup
  */
 export async function verifySMTP() {
+  if (process.env.RESEND_API_KEY) {
+    console.log(`[JV Controls Mailer] ✅ Resend HTTPS API configured (HTTPS Port 443 — Bypasses cloud SMTP blocks)`);
+    return true;
+  }
+  if (process.env.BREVO_API_KEY) {
+    console.log(`[JV Controls Mailer] ✅ Brevo HTTPS API configured (HTTPS Port 443 — Bypasses cloud SMTP blocks)`);
+    return true;
+  }
   const transporter = createTransporter();
   if (!transporter) {
-    console.warn('[JV Controls Mailer] ⚠️ SMTP credentials not set. Email OTPs will be logged to console.');
+    console.warn('[JV Controls Mailer] ⚠️ Email credentials not set. Set RESEND_API_KEY or SMTP_USER & SMTP_PASS.');
     return false;
   }
   try {
@@ -67,9 +75,99 @@ export async function verifySMTP() {
     console.log(`[JV Controls Mailer] ✅ SMTP connected & verified successfully (${process.env.SMTP_USER})`);
     return true;
   } catch (err) {
-    console.error(`[JV Controls Mailer] ❌ SMTP verification error (${err.message}). Check SMTP_USER & SMTP_PASS.`);
+    console.warn(`[JV Controls Mailer] ⚠️ SMTP connection timeout: ${err.message}.`);
+    console.warn(`[JV Controls Mailer] 💡 TIP: Free cloud hosts (Render/Vercel) block outbound SMTP ports (25/465/587). Add RESEND_API_KEY to your Render Environment to send live emails via HTTPS port 443!`);
     return false;
   }
+}
+
+/**
+ * Universal Email Delivery Engine:
+ * 1. Resend API (HTTPS port 443 — 100% works on Render free tier!)
+ * 2. Brevo API (HTTPS port 443 — 100% works on Render free tier!)
+ * 3. Nodemailer SMTP (works locally or with open SMTP ports)
+ * 4. Fallback simulation
+ */
+export async function deliverEmail({ from, to, subject, html }) {
+  const fromAddress = from || process.env.FROM_EMAIL || `"JV Controls Chennai" <${process.env.SMTP_USER || 'jvcjvcontrols@gmail.com'}>`;
+  const recipientList = Array.isArray(to) ? to : (typeof to === 'string' ? to.split(',').map(s => s.trim()).filter(Boolean) : [to]);
+
+  // 1. Resend API (HTTPS Port 443)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || 'JV Controls <onboarding@resend.dev>',
+          to: recipientList,
+          subject,
+          html,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        console.log(`[JV Controls Mailer] 🚀 Email delivered via Resend API to ${recipientList.join(', ')}. ID: ${data.id}`);
+        return { success: true, delivered: true, messageId: data.id, provider: 'resend' };
+      } else {
+        console.warn(`[JV Controls Mailer] ⚠️ Resend API returned error: ${data.message || JSON.stringify(data)}`);
+      }
+    } catch (err) {
+      console.warn(`[JV Controls Mailer] ⚠️ Resend fetch failed (${err.message}). Trying fallback...`);
+    }
+  }
+
+  // 2. Brevo API (HTTPS Port 443)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'JV Controls Chennai', email: process.env.SMTP_USER || 'jvcjvcontrols@gmail.com' },
+          to: recipientList.map(email => ({ email })),
+          subject,
+          htmlContent: html,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        console.log(`[JV Controls Mailer] 🚀 Email delivered via Brevo API to ${recipientList.join(', ')}. ID: ${data.messageId}`);
+        return { success: true, delivered: true, messageId: data.messageId, provider: 'brevo' };
+      } else {
+        console.warn(`[JV Controls Mailer] ⚠️ Brevo API returned error: ${data.message || JSON.stringify(data)}`);
+      }
+    } catch (err) {
+      console.warn(`[JV Controls Mailer] ⚠️ Brevo fetch failed (${err.message}). Trying fallback...`);
+    }
+  }
+
+  // 3. SMTP Transport (Nodemailer)
+  const transporter = createTransporter();
+  if (transporter) {
+    try {
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to: recipientList.join(', '),
+        subject,
+        html,
+      });
+      console.log(`[JV Controls Mailer] 📧 Email delivered via SMTP to ${recipientList.join(', ')}. MessageId: ${info.messageId}`);
+      return { success: true, delivered: true, messageId: info.messageId, provider: 'smtp' };
+    } catch (err) {
+      console.warn(`[JV Controls Mailer] ❌ SMTP send failed to ${recipientList.join(', ')} (${err.message}).`);
+      return { success: false, error: err.message };
+    }
+  }
+
+  console.log(`[JV Controls Mailer] ℹ️ Email dispatch simulated for ${recipientList.join(', ')}`);
+  return { success: true, simulated: true };
 }
 
 /**
@@ -81,11 +179,6 @@ export async function sendRegistrationOTP(email, name, otp) {
   console.log(`Recipient:  ${name} <${email}>`);
   console.log(`6-Digit OTP: >>> ${otp} <<< (Valid for 10 minutes)`);
   console.log('====================================================');
-
-  const transporter = createTransporter();
-  if (!transporter) {
-    return { success: true, simulated: true, otp };
-  }
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 550px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
@@ -116,20 +209,13 @@ export async function sendRegistrationOTP(email, name, otp) {
     </div>
   `;
 
-  try {
-    const fromAddress = process.env.FROM_EMAIL || `"JV Controls Chennai" <${process.env.SMTP_USER || 'jvcjvcontrols@gmail.com'}>`;
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to: email,
-      subject: `[${otp}] Verify Your JV Controls Account`,
-      html,
-    });
-    console.log(`[JV Controls Mailer] 📧 Registration OTP email delivered to ${email}. MessageId: ${info.messageId}`);
-    return { success: true, delivered: true, messageId: info.messageId };
-  } catch (err) {
-    console.error(`[JV Controls Mailer] ❌ SMTP send failed to ${email} (${err.message}).`);
-    return { success: false, error: err.message, otp };
-  }
+  const result = await deliverEmail({
+    to: email,
+    subject: `[${otp}] Verify Your JV Controls Account`,
+    html,
+  });
+
+  return { ...result, otp };
 }
 
 /**
@@ -142,54 +228,13 @@ export async function sendPasswordResetOTP(email, name, otp) {
   console.log(`6-Digit OTP: >>> ${otp} <<< (Valid for 10 minutes)`);
   console.log('====================================================');
 
-  const transporter = createTransporter();
-  if (!transporter) {
-    return { success: true, simulated: true, otp };
-  }
+  const result = await deliverEmail({
+    to: email,
+    subject: `[${otp}] Reset Your JV Controls Password`,
+    html,
+  });
 
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 550px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
-      <div style="background: #004b87; padding: 24px; text-align: center;">
-        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">JV CONTROLS CHENNAI</h1>
-        <p style="color: #cbd5e1; margin: 6px 0 0 0; font-size: 12px; text-transform: uppercase;">Password Reset Request</p>
-      </div>
-      <div style="padding: 32px 24px;">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Password Reset Verification</h2>
-        <p style="color: #475569; font-size: 14px; line-height: 1.6;">Hello <strong>${name || 'Customer'}</strong>,</p>
-        <p style="color: #475569; font-size: 14px; line-height: 1.6;">
-          We received a request to reset your password. Use the following 6-digit code to complete the reset:
-        </p>
-        <div style="margin: 24px 0; text-align: center;">
-          <span style="display: inline-block; font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #dc2626; background: #fef2f2; padding: 12px 28px; border-radius: 12px; border: 2px dashed #dc2626;">
-            ${otp}
-          </span>
-        </div>
-        <p style="color: #64748b; font-size: 12px;">
-          This code is valid for <strong>10 minutes</strong>. If you did not request a password reset, please contact our helpline immediately at +91 9500087723.
-        </p>
-        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-        <p style="color: #94a3b8; font-size: 11px; text-align: center; margin: 0;">
-          Plot No. 1957, 13th Main Road, Annanagar East, Chennai - 600040<br />
-          Helpline: +91 9500087723 | Email: jvcjvcontrols@gmail.com
-        </p>
-      </div>
-    </div>
-  `;
-
-  try {
-    const fromAddress = process.env.FROM_EMAIL || `"JV Controls Chennai" <${process.env.SMTP_USER || 'jvcjvcontrols@gmail.com'}>`;
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to: email,
-      subject: `[${otp}] Reset Your JV Controls Password`,
-      html,
-    });
-    console.log(`[JV Controls Mailer] 📧 Password reset email delivered to ${email}. MessageId: ${info.messageId}`);
-    return { success: true, delivered: true, messageId: info.messageId };
-  } catch (err) {
-    console.error(`[JV Controls Mailer] ❌ SMTP send failed to ${email} (${err.message}).`);
-    return { success: false, error: err.message, otp };
-  }
+  return { ...result, otp };
 }
 
 /**
@@ -456,23 +501,15 @@ export async function sendProductRegistrationEmail({ customerProduct, target = '
 
   // Send to Customer
   if ((target === 'both' || target === 'customer') && p.email) {
-    try {
-      if (transporter) {
-        const cInfo = await transporter.sendMail({
-          from: fromAddress,
-          to: p.email,
-          subject: `[JV Controls] ✅ Equipment Registered & Warranty Active: ${p.productName} (S/N: ${p.serialNumber})`,
-          html: customerHtml,
-        });
-        console.log(`[JV Controls Mailer] 📧 Equipment registration email delivered to customer ${p.email}. MessageId: ${cInfo.messageId}`);
-        results.customerSent = true;
-      } else {
-        console.log(`[JV Controls Mailer] Simulated registration email to customer ${p.email}`);
-        results.customerSent = true;
-      }
-    } catch (err) {
-      console.error(`[JV Controls Mailer] ❌ Failed to send registration email to customer ${p.email}:`, err.message);
-      results.customerError = err.message;
+    const res = await deliverEmail({
+      to: p.email,
+      subject: `[JV Controls] ✅ Equipment Registered & Warranty Active: ${p.productName} (S/N: ${p.serialNumber})`,
+      html: customerHtml,
+    });
+    if (res.success) {
+      results.customerSent = true;
+    } else {
+      results.customerError = res.error;
     }
   }
 
@@ -480,23 +517,15 @@ export async function sendProductRegistrationEmail({ customerProduct, target = '
   if (target === 'both' || target === 'admin') {
     const adminRecipients = getAdminEmailList();
     if (adminRecipients.length > 0) {
-      try {
-        if (transporter) {
-          const aInfo = await transporter.sendMail({
-            from: fromAddress,
-            to: adminRecipients.join(', '),
-            subject: `[Admin Order Alert] 📦 New Equipment Registered: ${p.customerName} - ${p.productName} (S/N: ${p.serialNumber})`,
-            html: adminHtml,
-          });
-          console.log(`[JV Controls Mailer] 📧 Equipment registration email delivered to admin(s) ${adminRecipients.join(', ')}. MessageId: ${aInfo.messageId}`);
-          results.adminSent = true;
-        } else {
-          console.log(`[JV Controls Mailer] Simulated registration email to admin(s) ${adminRecipients.join(', ')}`);
-          results.adminSent = true;
-        }
-      } catch (err) {
-        console.error(`[JV Controls Mailer] ❌ Failed to send registration email to admin(s):`, err.message);
-        results.adminError = err.message;
+      const res = await deliverEmail({
+        to: adminRecipients,
+        subject: `[Admin Order Alert] 📦 New Equipment Registered: ${p.customerName} - ${p.productName} (S/N: ${p.serialNumber})`,
+        html: adminHtml,
+      });
+      if (res.success) {
+        results.adminSent = true;
+      } else {
+        results.adminError = res.error;
       }
     }
   }
@@ -757,23 +786,15 @@ export async function sendServiceMilestoneEmail({ customerProduct, service, targ
 
   // Send to Customer
   if ((target === 'both' || target === 'customer') && p.email) {
-    try {
-      if (transporter) {
-        const cInfo = await transporter.sendMail({
-          from: fromAddress,
-          to: p.email,
-          subject: `[JV Controls] 🛠️ Periodic Maintenance Service #${s.serviceNumber} Due: ${p.productName} (S/N: ${p.serialNumber})`,
-          html: customerHtml,
-        });
-        console.log(`[JV Controls Mailer] 📧 6-Month service email delivered to customer ${p.email}. MessageId: ${cInfo.messageId}`);
-        results.customerSent = true;
-      } else {
-        console.log(`[JV Controls Mailer] Simulated 6-Month service email to customer ${p.email}`);
-        results.customerSent = true;
-      }
-    } catch (err) {
-      console.error(`[JV Controls Mailer] ❌ Failed to send service email to customer ${p.email}:`, err.message);
-      results.customerError = err.message;
+    const res = await deliverEmail({
+      to: p.email,
+      subject: `[JV Controls] 🛠️ Periodic Maintenance Service #${s.serviceNumber} Due: ${p.productName} (S/N: ${p.serialNumber})`,
+      html: customerHtml,
+    });
+    if (res.success) {
+      results.customerSent = true;
+    } else {
+      results.customerError = res.error;
     }
   }
 
@@ -781,23 +802,15 @@ export async function sendServiceMilestoneEmail({ customerProduct, service, targ
   if (target === 'both' || target === 'admin') {
     const adminRecipients = getAdminEmailList();
     if (adminRecipients.length > 0) {
-      try {
-        if (transporter) {
-          const aInfo = await transporter.sendMail({
-            from: fromAddress,
-            to: adminRecipients.join(', '),
-            subject: `[Admin Alert] ${isOverdue ? '🚨 OVERDUE' : '🔴 DUE'}: 6-Month Service #${s.serviceNumber} for ${p.customerName} - ${p.productName} (S/N: ${p.serialNumber})`,
-            html: adminHtml,
-          });
-          console.log(`[JV Controls Mailer] 📧 6-Month service email delivered to admin(s) ${adminRecipients.join(', ')}. MessageId: ${aInfo.messageId}`);
-          results.adminSent = true;
-        } else {
-          console.log(`[JV Controls Mailer] Simulated 6-Month service email to admin(s) ${adminRecipients.join(', ')}`);
-          results.adminSent = true;
-        }
-      } catch (err) {
-        console.error(`[JV Controls Mailer] ❌ Failed to send service email to admin(s):`, err.message);
-        results.adminError = err.message;
+      const res = await deliverEmail({
+        to: adminRecipients,
+        subject: `[Admin Alert] ${isOverdue ? '🚨 OVERDUE' : '🔴 DUE'}: 6-Month Service #${s.serviceNumber} for ${p.customerName} - ${p.productName} (S/N: ${p.serialNumber})`,
+        html: adminHtml,
+      });
+      if (res.success) {
+        results.adminSent = true;
+      } else {
+        results.adminError = res.error;
       }
     }
   }
@@ -1044,23 +1057,15 @@ export async function sendWarrantyExpiredEmail({ customerProduct, target = 'both
 
   // Send to Customer
   if ((target === 'both' || target === 'customer') && p.email) {
-    try {
-      if (transporter) {
-        const cInfo = await transporter.sendMail({
-          from: fromAddress,
-          to: p.email,
-          subject: `[JV Controls] ⚠️ Warranty Expiry Notice: ${p.productName} (S/N: ${p.serialNumber})`,
-          html: customerHtml,
-        });
-        console.log(`[JV Controls Mailer] 📧 Warranty expired email delivered to customer ${p.email}. MessageId: ${cInfo.messageId}`);
-        results.customerSent = true;
-      } else {
-        console.log(`[JV Controls Mailer] Simulated warranty expired email to customer ${p.email}`);
-        results.customerSent = true;
-      }
-    } catch (err) {
-      console.error(`[JV Controls Mailer] ❌ Failed to send warranty email to customer ${p.email}:`, err.message);
-      results.customerError = err.message;
+    const res = await deliverEmail({
+      to: p.email,
+      subject: `[JV Controls] ⚠️ Warranty Expiry Notice: ${p.productName} (S/N: ${p.serialNumber})`,
+      html: customerHtml,
+    });
+    if (res.success) {
+      results.customerSent = true;
+    } else {
+      results.customerError = res.error;
     }
   }
 
@@ -1068,23 +1073,15 @@ export async function sendWarrantyExpiredEmail({ customerProduct, target = 'both
   if (target === 'both' || target === 'admin') {
     const adminRecipients = getAdminEmailList();
     if (adminRecipients.length > 0) {
-      try {
-        if (transporter) {
-          const aInfo = await transporter.sendMail({
-            from: fromAddress,
-            to: adminRecipients.join(', '),
-            subject: `[Admin Alert] ⚠️ Warranty Expired: ${p.customerName} - ${p.productName} (S/N: ${p.serialNumber})`,
-            html: adminHtml,
-          });
-          console.log(`[JV Controls Mailer] 📧 Warranty expired email delivered to admin(s) ${adminRecipients.join(', ')}. MessageId: ${aInfo.messageId}`);
-          results.adminSent = true;
-        } else {
-          console.log(`[JV Controls Mailer] Simulated warranty expired email to admin(s) ${adminRecipients.join(', ')}`);
-          results.adminSent = true;
-        }
-      } catch (err) {
-        console.error(`[JV Controls Mailer] ❌ Failed to send warranty email to admin(s):`, err.message);
-        results.adminError = err.message;
+      const res = await deliverEmail({
+        to: adminRecipients,
+        subject: `[Admin Alert] ⚠️ Warranty Expired: ${p.customerName} - ${p.productName} (S/N: ${p.serialNumber})`,
+        html: adminHtml,
+      });
+      if (res.success) {
+        results.adminSent = true;
+      } else {
+        results.adminError = res.error;
       }
     }
   }
