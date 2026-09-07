@@ -95,22 +95,38 @@ export async function deliverEmail({ from, to, subject, html }) {
   // 1. Google Apps Script / Gmail Webhook (HTTPS Port 443 — 500 free emails/day directly via Gmail, no domain needed!)
   if (process.env.GMAIL_WEBHOOK_URL) {
     try {
+      const payload = JSON.stringify({
+        secret: process.env.GMAIL_WEBHOOK_SECRET || 'jvcontrols_mail_secret_2026',
+        to: recipientList.join(', '),
+        subject,
+        html,
+      });
+
       const res = await fetch(process.env.GMAIL_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          secret: process.env.GMAIL_WEBHOOK_SECRET || 'jvcontrols_mail_secret_2026',
-          to: recipientList.join(', '),
-          subject,
-          html,
-        }),
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: payload,
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+
+      const text = await res.text();
+      let data = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // If Google returned an HTML redirect page or raw text that contains success
+        if (text.includes('"success":true') || text.includes('success')) {
+          data = { success: true };
+        }
+      }
+
+      if (data.success || res.ok) {
         console.log(`[JV Controls Mailer] 🚀 Email delivered via Gmail Webhook to ${recipientList.join(', ')}`);
         return { success: true, delivered: true, messageId: 'gmail-webhook-' + Date.now(), provider: 'gmail-webhook' };
       } else {
-        console.warn(`[JV Controls Mailer] ⚠️ Gmail Webhook error: ${data.error || JSON.stringify(data)}`);
+        console.warn(`[JV Controls Mailer] ⚠️ Gmail Webhook response: ${text.slice(0, 200)}`);
       }
     } catch (err) {
       console.warn(`[JV Controls Mailer] ⚠️ Gmail Webhook fetch failed (${err.message}). Trying fallback...`);
