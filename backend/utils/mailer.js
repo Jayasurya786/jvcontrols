@@ -92,7 +92,67 @@ export async function deliverEmail({ from, to, subject, html }) {
   const fromAddress = from || process.env.FROM_EMAIL || `"JV Controls Chennai" <${process.env.SMTP_USER || 'jvcjvcontrols@gmail.com'}>`;
   const recipientList = Array.isArray(to) ? to : (typeof to === 'string' ? to.split(',').map(s => s.trim()).filter(Boolean) : [to]);
 
-  // 1. Brevo API (HTTPS Port 443 — sends to ANY customer email without requiring custom domain)
+  // 1. Google Apps Script / Gmail Webhook (HTTPS Port 443 — 500 free emails/day directly via Gmail, no domain needed!)
+  if (process.env.GMAIL_WEBHOOK_URL) {
+    try {
+      const res = await fetch(process.env.GMAIL_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: process.env.GMAIL_WEBHOOK_SECRET || 'jvcontrols_mail_secret_2026',
+          to: recipientList.join(', '),
+          subject,
+          html,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        console.log(`[JV Controls Mailer] 🚀 Email delivered via Gmail Webhook to ${recipientList.join(', ')}`);
+        return { success: true, delivered: true, messageId: 'gmail-webhook-' + Date.now(), provider: 'gmail-webhook' };
+      } else {
+        console.warn(`[JV Controls Mailer] ⚠️ Gmail Webhook error: ${data.error || JSON.stringify(data)}`);
+      }
+    } catch (err) {
+      console.warn(`[JV Controls Mailer] ⚠️ Gmail Webhook fetch failed (${err.message}). Trying fallback...`);
+    }
+  }
+
+  // 2. Mailjet API (HTTPS Port 443 — sends to ANY customer email)
+  if (process.env.MAILJET_API_KEY && process.env.MAILJET_SECRET_KEY) {
+    try {
+      const authHeader = 'Basic ' + Buffer.from(`${process.env.MAILJET_API_KEY}:${process.env.MAILJET_SECRET_KEY}`).toString('base64');
+      const senderEmail = process.env.MAILJET_SENDER_EMAIL || process.env.SMTP_USER || 'jvcjvcontrols@gmail.com';
+      const res = await fetch('https://api.mailjet.com/v3.1/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Messages: [
+            {
+              From: { Email: senderEmail, Name: 'JV Controls Chennai' },
+              To: recipientList.map((email) => ({ Email: email })),
+              Subject: subject,
+              HTMLPart: html,
+            },
+          ],
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.Messages?.[0]?.Status === 'success') {
+        const msgId = data.Messages[0].To?.[0]?.MessageID;
+        console.log(`[JV Controls Mailer] 🚀 Email delivered via Mailjet API to ${recipientList.join(', ')}. ID: ${msgId}`);
+        return { success: true, delivered: true, messageId: msgId, provider: 'mailjet' };
+      } else {
+        console.warn(`[JV Controls Mailer] ⚠️ Mailjet API error: ${JSON.stringify(data)}`);
+      }
+    } catch (err) {
+      console.warn(`[JV Controls Mailer] ⚠️ Mailjet fetch failed (${err.message}). Trying fallback...`);
+    }
+  }
+
+  // 3. Brevo API (HTTPS Port 443)
   if (process.env.BREVO_API_KEY) {
     try {
       const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || 'jvcjvcontrols@gmail.com';
@@ -121,7 +181,7 @@ export async function deliverEmail({ from, to, subject, html }) {
     }
   }
 
-  // 2. Resend API (HTTPS Port 443 — works for verified domains or testing to registered email)
+  // 4. Resend API (HTTPS Port 443)
   if (process.env.RESEND_API_KEY) {
     try {
       const res = await fetch('https://api.resend.com/emails', {
