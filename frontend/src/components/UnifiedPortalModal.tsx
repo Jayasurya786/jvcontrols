@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { apiUrl } from '../utils/api';
 import { 
   X, 
@@ -245,7 +245,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     setStatusUpdatingId(id);
     const targetStr = String(id);
     try {
-      const res = await fetch(`/api/admin/inquiries/${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/inquiries/${id}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -275,7 +275,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     setStatusUpdatingId(id);
     const targetStr = String(id);
     try {
-      const res = await fetch(`/api/admin/tickets/${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/tickets/${id}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -322,7 +322,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     setUpdatingServiceKey(key);
 
     try {
-      const res = await fetch(`/api/admin/customer-products/${productId}/service/${serviceNumber}`, {
+      const res = await fetch(apiUrl(`/api/admin/customer-products/${productId}/service/${serviceNumber}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -372,7 +372,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     setSendingEmailKey(key);
 
     try {
-      const res = await fetch(`/api/admin/customer-products/${productId}/service/${serviceNumber}/send-email`, {
+      const res = await fetch(apiUrl(`/api/admin/customer-products/${productId}/service/${serviceNumber}/send-email`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -391,7 +391,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
           )
         );
         showEmailFeedback(
-          `âœ“ 6-Month Service #${serviceNumber} alert email sent to Customer & Admin!`,
+          `✓ 6-Month Service #${serviceNumber} alert email sent to Customer & Admin!`,
           'success'
         );
       } else {
@@ -410,7 +410,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     setSendingEmailKey(key);
 
     try {
-      const res = await fetch(`/api/admin/customer-products/${productId}/send-warranty-email`, {
+      const res = await fetch(apiUrl(`/api/admin/customer-products/${productId}/send-warranty-email`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -670,8 +670,8 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
 
     try {
       const url = editingProductId
-        ? `/api/admin/customer-products/${editingProductId}`
-        : '/api/admin/customer-products';
+        ? apiUrl(`/api/admin/customer-products/${editingProductId}`)
+        : apiUrl('/api/admin/customer-products');
       const method = editingProductId ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -714,7 +714,7 @@ export const UnifiedPortalModal: React.FC<UnifiedPortalModalProps> = ({
     }
 
     try {
-      const res = await fetch(`/api/admin/customer-products/${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/customer-products/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

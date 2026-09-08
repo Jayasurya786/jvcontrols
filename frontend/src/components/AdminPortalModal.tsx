@@ -84,7 +84,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({ isOpen, onCl
 
   const handleUpdateInquiryStatus = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/admin/inquiries/${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/inquiries/${id}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ export const AdminPortalModal: React.FC<AdminPortalModalProps> = ({ isOpen, onCl
 
   const handleUpdateTicketStatus = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/admin/tickets/${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/tickets/${id}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
